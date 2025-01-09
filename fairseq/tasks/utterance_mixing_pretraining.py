@@ -13,7 +13,7 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 
 from dataclasses import dataclass, field
-from fairseq.data import Dictionary, UtteranceMixingDataset
+from fairseq.data import Dictionary, PAIUtteranceMixingDataset
 from fairseq.dataclass.configs import FairseqDataclass
 from fairseq.tasks import register_task
 from fairseq.tasks.fairseq_task import FairseqTask
@@ -197,7 +197,7 @@ class UtteranceMixingPretrainingTask(FairseqTask):
             f"{self.get_label_dir()}/{split}.{l}" for l in self.cfg.labels
         ]
 
-        self.datasets[split] = UtteranceMixingDataset(
+        self.datasets[split] = PAIUtteranceMixingDataset(
             manifest,
             sample_rate=self.cfg.sample_rate,
             label_paths=paths,
