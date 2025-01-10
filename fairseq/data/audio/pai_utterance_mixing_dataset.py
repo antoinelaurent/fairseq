@@ -326,6 +326,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         if diff <= 0:
             audio = Audio(sample_rate=16000, mono='downmix')
             wav, sr = audio({"audio": wav_path})
+            wav = torch.from_numpy(wav).float()
             return wav, 0
 
         start, end = 0, target_size
@@ -339,8 +340,9 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             size_s = size / 16000
 
             wav, sr = audio.crop(wav_path, Segment(start_s, end_s))
+            wav = torch.from_numpy(wav).float()
             logger.info(f"start:{start_s}s end:{end_s}s ({size_s}s total audio duration) {wav.shape}")
-        
+
         return wav, start
 
     def collater(self, samples):
@@ -369,6 +371,8 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         collated_audios, padding_mask, audio_starts = self.collater_audio(
             audios_ids, audio_size
         )
+
+        logger.info(f"dans collater ... collated_audios:{collated_audios}, shape: {collated_audios.shape}")
 
         if self.mixing_prob > 0:
             collated_audios = self.mixing_collated_audios(collated_audios)
@@ -488,14 +492,16 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             wav_path = os.path.join(self.audio_root, self.audio_names[audio_id])
 
             if diff == 0:
-                collated_audios[i], sr = audio({"audio": wav_path})
+                wav, sr = audio({"audio": wav_path})
+                collated_audios[i] = torch.from_numpy(wav).float()
                 assert self.sizes[audio_id] == len(collated_audios[i])
             elif diff < 0:
                 assert self.pad_audio
-                audio, sr = audio({"audio": wav_path})
+                wav, sr = audio({"audio": wav_path})
+                wav = torch.from_numpy(wav).float()
                 assert self.sizes[audio_id] == len(audio)
                 collated_audios[i] = torch.cat(
-                    [audio, audio.new_full((-diff,), 0.0)]
+                    [wav, wav.new_full((-diff,), 0.0)]
                 )
                 padding_mask[i, diff:] = True
             else:
