@@ -24,6 +24,8 @@ from fairseq.data.audio.audio_utils import (
     is_sf_audio_data,
 )
 
+from pyannote.audio import Audio
+
 logger = logging.getLogger(__name__)
 
 
@@ -307,21 +309,29 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             bnd = self.bnds[index]
         else:
             bnd = []
-        return {"id": index, "source": wav, "label_list": labels, "boundary": bnd}
+
+        #source is audio length instead of source
+        return {"id": index, "length": self.sizes[index], "label_list": labels, "boundary": bnd}
 
     def __len__(self):
         return len(self.sizes)
 
-    def crop_to_max_size(self, wav, target_size):
-        size = len(wav)
+    def crop_to_max_size(self, wav_id, target_size):
+        size = self.sizes[wav_id]
         diff = size - target_size
+        logger.info(f"dans crop to max size ... size:{size} target_size:{target_size} diff:{diff} wav_id:{wav_id}")
         if diff <= 0:
+            audio = Audio(sample_rate=16000, mono='downmix')
+            wav_path = os.path.join(self.audio_root, self.audio_names[wav_id])
+            wav, sr = audio({"audio": wav_path})
             return wav, 0
 
         start, end = 0, target_size
+        logger.info(f"start:{start} end:{end}")
         if self.random_crop:
             start = np.random.randint(0, diff + 1)
             end = size - diff + start
+            logger.info(f"start:{start} end:{end}")
         return wav[start:end], start
 
     def collater(self, samples):
@@ -336,15 +346,19 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             return {}
 
 
-        audios = [s["source"] for s in samples]
-        audio_sizes = [len(s) for s in audios]
+        audios_ids = [s["id"] for s in samples]
+        audio_sizes = [s["length"] for s in samples]
+
         bnds = [s["boundary"] for s in samples]
         if self.pad_audio:
             audio_size = min(max(audio_sizes), self.max_sample_size)
         else:
             audio_size = min(min(audio_sizes), self.max_sample_size)
+
+        logger.info(f"dans collater ... audio_size:{audio_size}")
+
         collated_audios, padding_mask, audio_starts = self.collater_audio(
-            audios, audio_size
+            audios_ids, audio_size
         )
 
         if self.mixing_prob > 0:
@@ -445,26 +459,37 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
         return source
 
-    def collater_audio(self, audios, audio_size):
-        collated_audios = audios[0].new_zeros(len(audios), audio_size)
+    def collater_audio(self, audios_ids, audio_size):
+        collated_audios = audios_ids[0].new_zeros(len(audios_ids), audio_size)
+        print(f"collated_audios:{collated_audios}, shape:{collated_audios.shape}")
+
         padding_mask = (
             torch.BoolTensor(collated_audios.shape).fill_(False)
             # if self.pad_audio else None
         )
-        audio_starts = [0 for _ in audios]
-        for i, audio in enumerate(audios):
-            diff = len(audio) - audio_size
+        audio_starts = [0 for _ in audios_ids]
+        logger.info(f"Collater audio: {audio_size} / {audio_starts}")
+
+        for i, audio_id in enumerate(audios_ids):
+            #diff = len(audio) - audio_size
+
+            diff = self.sizes[audio_id] - audio_size
+
+            audio = Audio(sample_rate=16000, mono='downmix')
+            wav_path = os.path.join(self.audio_root, self.audio_names[audio_id])
+
             if diff == 0:
-                collated_audios[i] = audio
+                collated_audios[i], sr = audio({"audio": wav_path})
             elif diff < 0:
                 assert self.pad_audio
+                audio, sr = audio({"audio": wav_path})
                 collated_audios[i] = torch.cat(
                     [audio, audio.new_full((-diff,), 0.0)]
                 )
                 padding_mask[i, diff:] = True
             else:
                 collated_audios[i], audio_starts[i] = self.crop_to_max_size(
-                    audio, audio_size
+                    audio_id, audio_size
                 )
 
         return collated_audios, padding_mask, audio_starts
