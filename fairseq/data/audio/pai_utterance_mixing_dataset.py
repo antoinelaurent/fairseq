@@ -460,7 +460,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         return source
 
     def collater_audio(self, audios_ids, audio_size):
-        collated_audios = audios_ids[0].new_zeros(len(audios_ids), audio_size)
+        collated_audios = torch.zeros(len(audios_ids), audio_size)
         print(f"collated_audios:{collated_audios}, shape:{collated_audios.shape}")
 
         padding_mask = (
