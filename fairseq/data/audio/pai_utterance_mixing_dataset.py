@@ -340,6 +340,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             size_s = size / 16000
 
             wav, sr = audio.crop(wav_path, Segment(start_s, end_s))
+            logger.info(f"wav:{wav}s {wav.shape}")
             wav = torch.from_numpy(wav).float()
             logger.info(f"start:{start_s}s end:{end_s}s ({size_s}s total audio duration) {wav.shape}")
 
