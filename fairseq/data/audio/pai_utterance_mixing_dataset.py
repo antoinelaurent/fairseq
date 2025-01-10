@@ -343,6 +343,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             wav, sr = audio.crop(wav_path, Segment(start_s, end_s))
             wav = wav.squeeze()
             logger.info(f"start:{start_s}s end:{end_s}s ({size_s}s total audio duration) {wav.shape}")
+            assert wav.shape[0] == target_size
 
         logger.info(f"SHAPE:{wav.shape}, START:{start}")
         return wav, start
