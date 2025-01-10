@@ -25,6 +25,7 @@ from fairseq.data.audio.audio_utils import (
 )
 
 from pyannote.audio import Audio
+from pyannote.core import Segment
 
 logger = logging.getLogger(__name__)
 
@@ -320,9 +321,10 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         size = self.sizes[wav_id]
         diff = size - target_size
         logger.info(f"dans crop to max size ... size:{size} target_size:{target_size} diff:{diff} wav_id:{wav_id}")
+        wav_path = os.path.join(self.audio_root, self.audio_names[wav_id])
+
         if diff <= 0:
             audio = Audio(sample_rate=16000, mono='downmix')
-            wav_path = os.path.join(self.audio_root, self.audio_names[wav_id])
             wav, sr = audio({"audio": wav_path})
             return wav, 0
 
@@ -331,8 +333,15 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         if self.random_crop:
             start = np.random.randint(0, diff + 1)
             end = size - diff + start
-            logger.info(f"start:{start} end:{end}")
-        return wav[start:end], start
+            audio = Audio(sample_rate=16000, mono='downmix')
+            start_s = start / 16000
+            end_s = end / 16000
+            size_s = size / 16000
+
+            wav, sr = audio.crop(wav_path, Segment(start_s, end_s))
+            logger.info(f"start:{start_s}s end:{end_s}s ({size_s}s total audio duration) {wav.shape}")
+        
+        return wav, start
 
     def collater(self, samples):
         # target = max(sizes) -> random_crop not used
