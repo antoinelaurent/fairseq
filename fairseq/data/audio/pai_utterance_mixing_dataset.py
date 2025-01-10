@@ -376,7 +376,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         else:
             audio_size = min(min(audio_sizes), self.max_sample_size)
 
-        #logger.info(f"dans collater ... audio_size:{audio_size}")
+        logger.info(f"dans collater ... audio_size:{audio_size} ({audio_size/self.sample_rate:.2f}s)")
 
         collated_audios, padding_mask, audio_starts = self.collater_audio(
             audios_ids, audio_size
