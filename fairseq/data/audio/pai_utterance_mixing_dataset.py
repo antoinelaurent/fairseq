@@ -299,7 +299,9 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         return [self.get_label(index, i) for i in range(self.num_labels)]
 
     def __getitem__(self, index):
-        wav = self.get_audio(index)
+        #wav = self.get_audio(index)
+        #we don't want to read the wav here
+        wav = None
         labels = self.get_labels(index)
         if len(self.bnds) > 0:
             bnd = self.bnds[index]
