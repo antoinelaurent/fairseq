@@ -9,6 +9,8 @@ import os
 import sys
 import io
 import json
+import time
+
 import h5py
 from typing import Any, List, Optional, Union
 
@@ -279,7 +281,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             wav_path = io.BytesIO(byte_data)
 
         #we don't want to fully read the wavfiles
-        logger.info(f"je suis ici dans get audio index:{index}")
+        logger.info(f"[ERROR] je suis ici dans get audio index:{index} !!")
         wav, cur_sample_rate = sf.read(wav_path)
         wav = torch.from_numpy(wav).float()
         wav = self.postprocess(wav, cur_sample_rate)
@@ -320,18 +322,18 @@ class PAIUtteranceMixingDataset(FairseqDataset):
     def crop_to_max_size(self, wav_id, target_size):
         size = self.sizes[wav_id]
         diff = size - target_size
-        logger.info(f"dans crop to max size ... size:{size} target_size:{target_size} diff:{diff} wav_id:{wav_id}")
+        #logger.info(f"dans crop to max size ... size:{size} target_size:{target_size} diff:{diff} wav_id:{wav_id}")
         wav_path = os.path.join(self.audio_root, self.audio_names[wav_id])
 
         if diff <= 0:
             audio = Audio(sample_rate=16000, mono='downmix')
             wav, sr = audio({"audio": wav_path})
             wav = wav.squeeze()
-            logger.info(f"diff <= 0 ({size/16000}s total audio duration) {wav.shape}")
+            #logger.info(f"diff <= 0 ({size/16000}s total audio duration) {wav.shape}")
             return wav, 0
 
         start, end = 0, target_size
-        logger.info(f"start:{start} end:{end}")
+        #logger.info(f"start:{start} end:{end}")
         if self.random_crop:
             start = np.random.randint(0, diff + 1)
             end = size - diff + start
@@ -350,6 +352,8 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         # target = max(sizes) -> random_crop not used
         # target = max_sample_size -> random_crop used for long
 
+
+        chrono_start = time.time()
         #logger.info(f"dans collater ... samples:{samples}")
 
 
@@ -363,15 +367,15 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
         bnds = [s["boundary"] for s in samples]
 
-        logger.info(f"self.pad_audio ? {self.pad_audio}, max(audio_sizes): {max(audio_sizes)}, "
-                    f"min(audio_sizes): {min(audio_sizes)}, max_sample_size:{self.max_sample_size}")
+        #logger.info(f"self.pad_audio ? {self.pad_audio}, max(audio_sizes): {max(audio_sizes)}, "
+        #            f"min(audio_sizes): {min(audio_sizes)}, max_sample_size:{self.max_sample_size}")
 
         if self.pad_audio:
             audio_size = min(max(audio_sizes), self.max_sample_size)
         else:
             audio_size = min(min(audio_sizes), self.max_sample_size)
 
-        logger.info(f"dans collater ... audio_size:{audio_size}")
+        #logger.info(f"dans collater ... audio_size:{audio_size}")
 
         collated_audios, padding_mask, audio_starts = self.collater_audio(
             audios_ids, audio_size
@@ -409,6 +413,9 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             batch["task"] = "multitask"
         else:
             batch["task"] = "wavlm"
+
+        chrono_end = time.time()
+        logger.info(f"Time to prepare batch:{chrono_end - chrono_start:.5f}s (batch:{batch})")
         return batch
 
     def mixing_collated_audios(self, source):
@@ -479,18 +486,16 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
     def collater_audio(self, audios_ids, audio_size):
         collated_audios = torch.zeros(len(audios_ids), audio_size)
-        print(f"collated_audios:{collated_audios}, shape:{collated_audios.shape}")
+        #print(f"collated_audios:{collated_audios}, shape:{collated_audios.shape}")
 
         padding_mask = (
             torch.BoolTensor(collated_audios.shape).fill_(False)
             # if self.pad_audio else None
         )
         audio_starts = [0 for _ in audios_ids]
-        logger.info(f"Collater audio: {audio_size} / {audio_starts}")
+        #logger.info(f"Collater audio: {audio_size} / {audio_starts}")
 
         for i, audio_id in enumerate(audios_ids):
-            #diff = len(audio) - audio_size
-
             diff = self.sizes[audio_id] - audio_size
 
             audio = Audio(sample_rate=16000, mono='downmix')
@@ -499,18 +504,18 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             if diff == 0:
                 wav, sr = audio({"audio": wav_path})
                 collated_audios[i] = wav.squeeze()
-                logger.info("diff==0 collater.audio exact same size")
+                #logger.info("diff==0 collater.audio exact same size")
                 assert self.sizes[audio_id] == len(collated_audios[i])
             elif diff < 0:
                 assert self.pad_audio
                 wav, sr = audio({"audio": wav_path})
                 wav = wav.squeeze()
-                logger.info(f"diff<0 ({diff}) wav.shape:{wav.shape}")
+                #logger.info(f"diff<0 ({diff}) wav.shape:{wav.shape}")
                 assert self.sizes[audio_id] == len(wav)
                 collated_audios[i] = torch.cat(
                     [wav, wav.new_full((-diff,), 0.0)]
                 )
-                logger.info(f"diff<0 ({diff}) after pad wav.shape:{collated_audios[i].shape}")
+                #logger.info(f"diff<0 ({diff}) after pad wav.shape:{collated_audios[i].shape}")
                 padding_mask[i, diff:] = True
             else:
                 collated_audios[i], audio_starts[i] = self.crop_to_max_size(
