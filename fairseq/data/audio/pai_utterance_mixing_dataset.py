@@ -368,8 +368,8 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
         bnds = [s["boundary"] for s in samples]
 
-        #logger.info(f"self.pad_audio ? {self.pad_audio}, max(audio_sizes): {max(audio_sizes)}, "
-        #            f"min(audio_sizes): {min(audio_sizes)}, max_sample_size:{self.max_sample_size}")
+        logger.info(f"self.pad_audio ? {self.pad_audio}, max(audio_sizes): {max(audio_sizes)}, "
+                    f"min(audio_sizes): {min(audio_sizes)}, max_sample_size:{self.max_sample_size}")
 
         if self.pad_audio:
             audio_size = min(max(audio_sizes), self.max_sample_size)
