@@ -301,7 +301,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
     def __getitem__(self, index):
         #wav = self.get_audio(index)
         #we don't want to read the wav here
-        wav = None
+        wav = -1
         labels = self.get_labels(index)
         if len(self.bnds) > 0:
             bnd = self.bnds[index]
@@ -332,7 +332,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             return {}
 
         logger.info(f"dans collater ... samples:{samples}")
-        
+
         audios = [s["source"] for s in samples]
         audio_sizes = [len(s) for s in audios]
         bnds = [s["boundary"] for s in samples]
