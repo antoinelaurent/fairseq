@@ -576,8 +576,8 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         return self.size(index)
 
     def size(self, index):
-        if self.pad_audio:
-            return self.sizes[index]
+        #if self.pad_audio:
+        #    return self.sizes[index]
         return min(self.sizes[index], self.max_sample_size)
 
     def ordered_indices(self):
