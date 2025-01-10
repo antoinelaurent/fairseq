@@ -340,9 +340,10 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             end_s = end / 16000
             size_s = size / 16000
 
-            wav, sr = audio.crop(wav_path, Segment(start_s, end_s))
+            wav, sr = audio.crop(wav_path, Segment(start_s, end_s), duration=target_size/16000)
             wav = wav.squeeze()
-            logger.info(f"start:{start_s}s end:{end_s}s ({size_s}s total audio duration) {wav.shape}")
+            logger.info(f"start:{start_s}s end:{end_s}s duration={target_size/16000}s "
+                        f"({size_s}s total audio duration) {wav.shape}")
             assert wav.shape[0] == target_size
 
         logger.info(f"SHAPE:{wav.shape}, START:{start}")
@@ -497,6 +498,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             if diff == 0:
                 wav, sr = audio({"audio": wav_path})
                 collated_audios[i] = wav.squeeze()
+                logger.debug("exact same size")
                 assert self.sizes[audio_id] == len(collated_audios[i])
             elif diff < 0:
                 assert self.pad_audio
