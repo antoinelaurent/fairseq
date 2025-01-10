@@ -362,12 +362,16 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         audio_sizes = [s["length"] for s in samples]
 
         bnds = [s["boundary"] for s in samples]
+
+        logger.info(f"self.pad_audio ? {self.pad_audio}, max(audio_sizes): {max(audio_sizes)}, "
+                    f"min(audio_sizes): {min(audio_sizes)}, max_sample_size:{self.max_sample_size}")
+
         if self.pad_audio:
             audio_size = min(max(audio_sizes), self.max_sample_size)
         else:
             audio_size = min(min(audio_sizes), self.max_sample_size)
 
-        #logger.info(f"dans collater ... audio_size:{audio_size}")
+        logger.info(f"dans collater ... audio_size:{audio_size}")
 
         collated_audios, padding_mask, audio_starts = self.collater_audio(
             audios_ids, audio_size
@@ -501,12 +505,12 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                 assert self.pad_audio
                 wav, sr = audio({"audio": wav_path})
                 wav = wav.squeeze()
-                logger.info(f"diff<0 wav.shape:{wav.shape}")
+                logger.info(f"diff<0 ({diff}) wav.shape:{wav.shape}")
                 assert self.sizes[audio_id] == len(wav)
                 collated_audios[i] = torch.cat(
                     [wav, wav.new_full((-diff,), 0.0)]
                 )
-                logger.info(f"diff<0 after pad wav.shape:{collated_audios[i].shape}")
+                logger.info(f"diff<0 ({diff}) after pad wav.shape:{collated_audios[i].shape}")
                 padding_mask[i, diff:] = True
             else:
                 collated_audios[i], audio_starts[i] = self.crop_to_max_size(
