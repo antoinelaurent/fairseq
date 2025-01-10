@@ -327,6 +327,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             audio = Audio(sample_rate=16000, mono='downmix')
             wav, sr = audio({"audio": wav_path})
             wav = wav.squeeze()
+            logger.info(f"({size/16000}s total audio duration) {wav.shape}")
             return wav, 0
 
         start, end = 0, target_size
@@ -343,6 +344,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             wav = wav.squeeze()
             logger.info(f"start:{start_s}s end:{end_s}s ({size_s}s total audio duration) {wav.shape}")
 
+        logger.info(f"SHAPE:{wav.shape}, START:{start}")
         return wav, start
 
     def collater(self, samples):
