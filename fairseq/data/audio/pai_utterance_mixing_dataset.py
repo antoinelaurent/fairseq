@@ -331,6 +331,8 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         if len(samples) == 0:
             return {}
 
+        logger.info(f"dans collater ... samples:{samples}")
+        
         audios = [s["source"] for s in samples]
         audio_sizes = [len(s) for s in audios]
         bnds = [s["boundary"] for s in samples]
