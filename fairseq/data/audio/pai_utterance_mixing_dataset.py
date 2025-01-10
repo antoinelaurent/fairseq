@@ -341,7 +341,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         logger.info(f"dans collater ... samples:{samples}")
 
 
-        samples = [s for s in samples if s["source"] is not None]
+        samples = [s for s in samples if s["length"] is not None]
         if len(samples) == 0:
             return {}
 
@@ -480,9 +480,11 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
             if diff == 0:
                 collated_audios[i], sr = audio({"audio": wav_path})
+                assert self.sizes[audio_id] == len(collated_audios[i])
             elif diff < 0:
                 assert self.pad_audio
                 audio, sr = audio({"audio": wav_path})
+                assert self.sizes[audio_id] == len(audio)
                 collated_audios[i] = torch.cat(
                     [audio, audio.new_full((-diff,), 0.0)]
                 )
