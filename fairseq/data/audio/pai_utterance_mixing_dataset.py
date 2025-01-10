@@ -326,7 +326,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         if diff <= 0:
             audio = Audio(sample_rate=16000, mono='downmix')
             wav, sr = audio({"audio": wav_path})
-            wav = torch.from_numpy(wav).float()
+            wav = wav.squeeze()
             return wav, 0
 
         start, end = 0, target_size
@@ -340,8 +340,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             size_s = size / 16000
 
             wav, sr = audio.crop(wav_path, Segment(start_s, end_s))
-            logger.info(f"wav:{wav}s {wav.shape}")
-            wav = torch.from_numpy(wav).float()
+            wav = wav.squeeze()
             logger.info(f"start:{start_s}s end:{end_s}s ({size_s}s total audio duration) {wav.shape}")
 
         return wav, start
@@ -494,13 +493,13 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
             if diff == 0:
                 wav, sr = audio({"audio": wav_path})
-                collated_audios[i] = torch.from_numpy(wav).float()
+                collated_audios[i] = wav.squeeze()
                 assert self.sizes[audio_id] == len(collated_audios[i])
             elif diff < 0:
                 assert self.pad_audio
                 wav, sr = audio({"audio": wav_path})
-                wav = torch.from_numpy(wav).float()
-                assert self.sizes[audio_id] == len(audio)
+                wav = wav.squeeze()
+                assert self.sizes[audio_id] == len(wav)
                 collated_audios[i] = torch.cat(
                     [wav, wav.new_full((-diff,), 0.0)]
                 )
