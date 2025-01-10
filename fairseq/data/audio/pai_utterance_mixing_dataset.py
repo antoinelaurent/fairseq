@@ -416,7 +416,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             batch["task"] = "wavlm"
 
         chrono_end = time.time()
-        logger.info(f"Time to prepare batch:{chrono_end - chrono_start:.5f}s (batch:{batch})")
+        #logger.info(f"Time to prepare batch:{chrono_end - chrono_start:.5f}s (batch:{batch})")
         return batch
 
     def mixing_collated_audios(self, source):
