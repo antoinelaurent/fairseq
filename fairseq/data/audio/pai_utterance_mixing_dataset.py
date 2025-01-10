@@ -327,7 +327,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         wav_path = os.path.join(self.audio_root, self.audio_names[wav_id])
 
         if diff <= 0:
-            audio = Audio(sample_rate=16000, mono='downmix')
+            audio = Audio(sample_rate=self.sample_rate, mono='downmix')
             wav, sr = audio({"audio": wav_path})
             wav = wav.squeeze()
             #logger.info(f"diff <= 0 ({size/16000}s total audio duration) {wav.shape}")
@@ -338,9 +338,9 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         if self.random_crop:
             start = np.random.randint(0, diff + 1)
             end = size - diff + start
-            audio = Audio(sample_rate=16000, mono='downmix')
+            audio = Audio(sample_rate=self.sample_rate, mono='downmix')
 
-            wav, sr = audio.crop(wav_path, Segment(start/16000, end/16000), duration=target_size/16000)
+            wav, sr = audio.crop(wav_path, Segment(start/self.sample_rate, end/self.sample_rate), duration=target_size/self.sample_rate)
             wav = wav.squeeze()
             #logger.info(f"start:{start_s}s end:{end_s}s duration={target_size/16000}s "
             #            f"({size_s}s total audio duration) {wav.shape}")
@@ -499,7 +499,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         for i, audio_id in enumerate(audios_ids):
             diff = self.sizes[audio_id] - audio_size
 
-            audio = Audio(sample_rate=16000, mono='downmix')
+            audio = Audio(sample_rate=self.sample_rate, mono='downmix')
             wav_path = os.path.join(self.audio_root, self.audio_names[audio_id])
 
             if diff == 0:
