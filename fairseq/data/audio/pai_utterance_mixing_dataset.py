@@ -275,6 +275,8 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             assert is_sf_audio_data(byte_data)
             wav_path = io.BytesIO(byte_data)
 
+        #we don't want to fully read the wavfiles
+        logger.log(f"je suis ici dans get audio index:{index}")
         wav, cur_sample_rate = sf.read(wav_path)
         wav = torch.from_numpy(wav).float()
         wav = self.postprocess(wav, cur_sample_rate)
