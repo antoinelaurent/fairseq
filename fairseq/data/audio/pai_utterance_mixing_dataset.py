@@ -283,12 +283,20 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
             durations = np.zeros(len(self.dataset_indices))
 
+            probas = dict()
+            tmp = dict()
+
             for (dind, dataset) in enumerate(self.dataset_indices):
                 duration = 0
                 for ind in self.dataset_indices[dataset]:
                     duration += self.sizes[ind]
                 durations[dind] = duration
+                tmp[dataset] = duration
                 datasets.append(dataset)
+
+            for dataset in self.dataset_indices:
+                probas[dataset] = tmp[dataset] / np.sum(durations)
+
 
             probas = durations / np.sum(durations)
 
@@ -308,7 +316,8 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
             logger.info(f"tirages:{tirages}")
             for d in tirages:
-                logger.info(f"d:{tirages[d]/1000}")
+                logger.info(f"tirage:{d}:{tirages[d]/10000}")
+                logger.info(f"proba:{d}:{probas[d]}")
 
         if isinstance(indices[0], list):
             batch_list = []
