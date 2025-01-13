@@ -191,15 +191,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             )
         )
 
-        if self.balance:
-            logger.info(f"{len(self.dataset_indices)} dataset loaded")
-            for dataset in self.dataset_indices:
-                duration = 0
-                logger.info(f"{dataset}: {len(self.dataset_indices[dataset])}")
-                for ind in self.dataset_indices[dataset]:
-                    duration += sizes[ind]
-                logger.info(f"number of frames: {duration} (duration: {duration/self.sample_rate:.2f}s)")
-                logger.info(f"avg duration: {duration/len(self.dataset_indices[dataset])}")
+
 
         self.audio_root = root
         self.audio_names = names
@@ -259,6 +251,17 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             f"mixing_noise={mixing_noise}, mixing_noise_prob={mixing_noise_prob},  mixing_noise_num={mixing_noise_num},"
             f"noise_path={noise_path}, noise_list_len={len(self.noise_list)},"
         )
+
+        if self.balance:
+            logger.info(f"{len(self.dataset_indices)} dataset loaded")
+            for dataset in self.dataset_indices:
+                duration = 0
+                for ind in self.dataset_indices[dataset]:
+                    duration += sizes[ind]
+                logger.info(f"{dataset}: {len(self.dataset_indices[dataset])} - duration: {duration / self.sample_rate:.2f}s)")
+                logger.info(
+                    f"avg samples: {duration / len(self.dataset_indices[dataset]) / self.max_sample_size}")
+
 
     def set_epoch(self, epoch):
         self.epoch = epoch
