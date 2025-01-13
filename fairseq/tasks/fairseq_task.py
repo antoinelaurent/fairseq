@@ -297,7 +297,7 @@ class FairseqTask(object):
                 )
 
             logger.info(f"indices: {indices}")
-            
+
             # create mini-batches with given size constraints
             batches = dataset.batch_by_size(
                 indices,

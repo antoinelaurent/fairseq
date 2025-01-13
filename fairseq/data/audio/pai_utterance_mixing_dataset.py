@@ -119,7 +119,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         mixing_noise_prob: float = 0.0,
         mixing_noise_num: int = 1,
         noise_path: Optional[str] = None,
-        balance: bool = False,
+        dataset_name: Optional[str] = None,
     ):
         self.sample_rate = sample_rate
         self.shuffle = shuffle
@@ -135,7 +135,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
         self.chunk_names = []
         self.chunk_indices = []
-        self.balance = balance
+        self.dataset_name = dataset_name
 
         n_long, n_short = 0, 0
         names, inds, sizes = [], [], []
@@ -145,10 +145,20 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             with open(bnd_path) as f:
                 bnds = f.readlines()
         new_bnds = []
+        if len(bnds) > 0 and self.dataset_name is not None:
+            raise Exception("bnd file not supported")
+
+        ind = 0
+
         with open(manifest_path) as f:
             root = f.readline().strip()
-            for ind, line in enumerate(f):
+            for line in f:
                 items = line.strip().split("\t")
+                if self.dataset_name is not None:
+                    assert len(items) == 3
+                    if items[2] != self.dataset_name:
+                        continue
+                ind += 1
                 sz = int(items[1])
                 if min_keep_sample_size is not None and sz < min_keep_sample_size:
                     n_short += 1
