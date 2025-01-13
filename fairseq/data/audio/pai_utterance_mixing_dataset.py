@@ -139,6 +139,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
 
         self.dataset_indices = dict()
+        self.ind_dataset = []
 
         n_long, n_short = 0, 0
         names, inds, sizes = [], [], []
@@ -163,6 +164,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                     if not dataset in self.dataset_indices:
                         self.dataset_indices[dataset] = []
                     self.dataset_indices[dataset].append(ind)
+                    self.ind_dataset[ind] = dataset
 
                 sz = int(items[1])
                 if min_keep_sample_size is not None and sz < min_keep_sample_size:
@@ -258,9 +260,9 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                 duration = 0
                 for ind in self.dataset_indices[dataset]:
                     duration += sizes[ind]
-                logger.info(f"{dataset}: {len(self.dataset_indices[dataset])} - duration: {duration / self.sample_rate:.2f}s)")
-                logger.info(
-                    f"avg samples: {duration / len(self.dataset_indices[dataset]) / self.max_sample_size}")
+                avg_crop = duration / len(self.dataset_indices[dataset]) / self.max_sample_size
+                logger.info(f"{dataset}: {len(self.dataset_indices[dataset])} - duration: {duration / self.sample_rate:.2f}s) - "
+                            f"avg crop per file w/ sliding window: {avg_crop:.2f}")
 
 
     def set_epoch(self, epoch):
@@ -273,6 +275,12 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         #ici il faut prepare les batches
         #indice contient tous les fichiers
         logger.info(f"isinstance(indices[0], list) ? {isinstance(indices[0], list)} {indices[0]} indices:{indices}")
+        if self.balance:
+            indices = []
+            for dataset in self.dataset_indices:
+                indices.append(self.dataset_indices[dataset])
+            logger.info(f"indices={indices}")
+            
         if isinstance(indices[0], list):
             batch_list = []
             for indice in indices:
