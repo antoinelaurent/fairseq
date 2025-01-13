@@ -215,37 +215,7 @@ class UtteranceMixingPretrainingTask(FairseqTask):
                     items = line.strip().split("\t")
                     datasets[items[2]] = datasets.get(items[2], 0) + 1
 
-            for d in datasets:
-                print(f"{d}: read {datasets[d]} samples")
-                datasets[d] = PAIUtteranceMixingDataset(
-                    manifest,
-                    sample_rate=self.cfg.sample_rate,
-                    label_paths=paths,
-                    label_rates=self.cfg.label_rate,
-                    pad_list=pad_list,
-                    eos_list=eos_list,
-                    label_processors=procs,
-                    max_keep_sample_size=None,
-                    min_keep_sample_size=self.cfg.min_sample_size,
-                    max_sample_size=self.cfg.max_sample_size,
-                    pad_audio=self.cfg.pad_audio,
-                    normalize=self.cfg.normalize,
-                    store_labels=False,
-                    random_crop=self.cfg.random_crop,
-                    single_target=self.cfg.single_target,
-                    mixing_max_len=self.cfg.mixing_max_len,
-                    mixing_prob=self.cfg.mixing_prob,
-                    mixing_num=self.cfg.mixing_num,
-                    mixing_noise=self.cfg.mixing_noise,
-                    mixing_noise_prob=self.cfg.mixing_noise_prob,
-                    mixing_noise_num=self.cfg.mixing_noise_num,
-                    noise_path=self.cfg.noise_path,
-                    dataset_name=d,
-                )
 
-            self.datasets[split] = MultiCorpusSampledDataset(datasets)
-
-        else:
             self.datasets[split] = PAIUtteranceMixingDataset(
                 manifest,
                 sample_rate=self.cfg.sample_rate,
@@ -269,6 +239,7 @@ class UtteranceMixingPretrainingTask(FairseqTask):
                 mixing_noise_prob=self.cfg.mixing_noise_prob,
                 mixing_noise_num=self.cfg.mixing_noise_num,
                 noise_path=self.cfg.noise_path,
+                balance = self.cfg.balance,
             )
 
     def max_positions(self) -> Tuple[int, int]:
