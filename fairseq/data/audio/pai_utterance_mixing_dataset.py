@@ -175,7 +175,8 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                     if len(bnds) > 0:
                         new_bnds.append(list(map(int, bnds[ind].strip().split())))
                 ind += 1
-        tot = ind + 1
+
+        tot = ind
         logger.info(
             (
                 f"max_keep={max_keep_sample_size}, min_keep={min_keep_sample_size}, "
