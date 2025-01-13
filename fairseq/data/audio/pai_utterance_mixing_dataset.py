@@ -291,7 +291,11 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
             probas = durations / np.sum(durations)
 
-            logger.info(f"probas={probas}")
+            cum_prob_annotated_duration = np.cumsum(
+                durations / np.sum(durations)
+            )
+
+            logger.info(f"probas={probas} / cum_prob_annotated_duration={cum_prob_annotated_duration}")
 
 
         if isinstance(indices[0], list):
