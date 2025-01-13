@@ -158,7 +158,6 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                     assert len(items) == 3
                     if items[2] != self.dataset_name:
                         continue
-                ind += 1
                 sz = int(items[1])
                 if min_keep_sample_size is not None and sz < min_keep_sample_size:
                     n_short += 1
@@ -175,6 +174,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                     sizes.append(sz)
                     if len(bnds) > 0:
                         new_bnds.append(list(map(int, bnds[ind].strip().split())))
+                ind += 1
         tot = ind + 1
         logger.info(
             (
