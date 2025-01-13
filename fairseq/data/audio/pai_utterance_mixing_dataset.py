@@ -164,7 +164,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                     if not dataset in self.dataset_indices:
                         self.dataset_indices[dataset] = []
                     self.dataset_indices[dataset].append(ind)
-                    self.ind_dataset[ind] = dataset
+                    self.ind_dataset.append(dataset)
 
                 sz = int(items[1])
                 if min_keep_sample_size is not None and sz < min_keep_sample_size:
@@ -275,10 +275,12 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         #ici il faut prepare les batches
         #indice contient tous les fichiers
         logger.info(f"isinstance(indices[0], list) ? {isinstance(indices[0], list)} {indices[0]} indices:{indices}")
-        #if self.balance:
-        #    for dataset in self.dataset_indices:
-        #        indices.append(self.dataset_indices[dataset])
-        #        logger.info(f"bbs: indices:{self.dataset_indices[dataset]}")
+        if self.balance:
+            indices = []
+            for dataset in self.dataset_indices:
+                indices.append(self.dataset_indices[dataset])
+                logger.info(f"bbs: indices:{indices}")
+
 
 
         if isinstance(indices[0], list):
