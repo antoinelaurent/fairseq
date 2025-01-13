@@ -297,9 +297,6 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             for dataset in self.dataset_indices:
                 probas[dataset] = tmp[dataset] / np.sum(durations)
 
-
-            probas = durations / np.sum(durations)
-
             cum_prob_annotated_duration = np.cumsum(
                 durations / np.sum(durations)
             )
