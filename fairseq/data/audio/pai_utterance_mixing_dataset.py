@@ -296,7 +296,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             )
 
             logger.info(f"probas={probas} / cum_prob_annotated_duration={cum_prob_annotated_duration}")
-
+            logger.info(f"datasets={datasets} / cum_prob_annotated_duration={cum_prob_annotated_duration}")
 
         if isinstance(indices[0], list):
             batch_list = []
