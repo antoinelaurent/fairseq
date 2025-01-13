@@ -307,7 +307,7 @@ class FairseqTask(object):
             )
 
             logger.info(f"batches: {batches} (len : {len(batches)})")
-            
+
             return batches
 
         reuse_dataloader = getattr(self.cfg, "reuse_dataloader", True)
