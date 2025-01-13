@@ -32,6 +32,7 @@ from pyannote.core import Segment
 logger = logging.getLogger(__name__)
 
 
+
 def load_label(label_path, inds, tot):
     with open(label_path) as f:
         labels = [line.rstrip() for line in f]
@@ -297,6 +298,17 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
             logger.info(f"probas={probas} / cum_prob_annotated_duration={cum_prob_annotated_duration}")
             logger.info(f"datasets={datasets} / cum_prob_annotated_duration={cum_prob_annotated_duration}")
+
+            tirages = dict()
+            for i in range(10000):
+                dataset = datasets[cum_prob_annotated_duration.searchsorted(np.random.random())]
+                if not dataset in tirages:
+                    tirages[dataset] = 0
+                tirages[dataset] += 1
+
+            logger.info(f"tirages:{tirages}")
+            for d in tirages:
+                logger.info(f"d:{tirages[d]/1000}")
 
         if isinstance(indices[0], list):
             batch_list = []
