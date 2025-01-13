@@ -14,7 +14,6 @@ import numpy as np
 
 from dataclasses import dataclass, field
 from fairseq.data import Dictionary, PAIUtteranceMixingDataset
-from fairseq.data.multi_corpus_sampled_dataset import MultiCorpusSampledDataset
 
 from fairseq.dataclass.configs import FairseqDataclass
 from fairseq.tasks import register_task
@@ -231,7 +230,7 @@ class UtteranceMixingPretrainingTask(FairseqTask):
             noise_path=self.cfg.noise_path,
             balance = self.cfg.balance
         )
-            
+
 
     def max_positions(self) -> Tuple[int, int]:
         return (sys.maxsize, sys.maxsize)

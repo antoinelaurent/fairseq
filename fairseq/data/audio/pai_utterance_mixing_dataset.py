@@ -190,6 +190,12 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                 f"longest-loaded={max(sizes)}, shortest-loaded={min(sizes)}"
             )
         )
+
+        if self.balance:
+            logger.info(f"{len(self.dataset_indices)} dataset loaded")
+            for dataset in self.dataset_indices:
+                logger.info(f"{dataset}: {len(self.dataset_indices[dataset])}")
+
         self.audio_root = root
         self.audio_names = names
         self.sizes = sizes
@@ -602,6 +608,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
     def ordered_indices(self):
         """Return an ordered list of indices. Batches will be constructed based
         on this order."""
+
 
         if self.shuffle:
             if len(self.chunk_names) > 0:
