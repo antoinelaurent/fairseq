@@ -119,6 +119,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         mixing_noise_prob: float = 0.0,
         mixing_noise_num: int = 1,
         noise_path: Optional[str] = None,
+        balance: bool = False,
     ):
         self.sample_rate = sample_rate
         self.shuffle = shuffle
@@ -134,6 +135,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
         self.chunk_names = []
         self.chunk_indices = []
+        self.balance = balance
 
         n_long, n_short = 0, 0
         names, inds, sizes = [], [], []
@@ -237,7 +239,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         self.max_tokens = max_tokens
         self.max_sentences = max_sentences
         self.required_batch_size_multiple = required_batch_size_multiple
-        logger.info(f"isinstance(indices[0], list) ? {isinstance(indices[0], list)} {indices[0]} indices:{indices}")
+        logger.info(f"isinstance(indices[0], list) ? {isinstance(indices[0], list)} {indices[0]} indices:{indices} balance ? {self.balance}")
         if isinstance(indices[0], list):
             batch_list = []
             for indice in indices:

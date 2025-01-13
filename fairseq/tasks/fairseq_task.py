@@ -296,6 +296,8 @@ class FairseqTask(object):
                     indices, dataset, max_positions, ignore_invalid_inputs
                 )
 
+            logger.info(f"indices: {indices}")
+            
             # create mini-batches with given size constraints
             batches = dataset.batch_by_size(
                 indices,
