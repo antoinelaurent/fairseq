@@ -300,7 +300,7 @@ class FairseqTask(object):
 
             # create mini-batches with given size constraints
 
-            #batches contain indices of dataset examples for the curret epoch
+            #batches contain indices of dataset examples for the current epoch
             #ex: array([3473, 2045, 2873, 1863, 2839, 3343]), array([2196, 2408, 3221, 2806, 4331, 3713]), ...
 
             batches = dataset.batch_by_size(

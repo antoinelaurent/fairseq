@@ -276,11 +276,22 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         #indice contient tous les fichiers
         logger.info(f"isinstance(indices[0], list) ? {isinstance(indices[0], list)} {indices[0]} indices:{indices}")
         if self.balance:
-            indices = []
-            for dataset in self.dataset_indices:
-                indices.append(self.dataset_indices[dataset])
-                logger.info(f"bbs: indices:{indices}")
+            # convert duration of each dataset into probabilities
+            datasets = []
+            total_duration = 0
 
+            durations = np.zeros(len(self.dataset_indices))
+
+            for (ind, dataset) in enumerate(self.dataset_indices):
+                duration = 0
+                for ind in self.dataset_indices[dataset]:
+                    duration += self.sizes[ind]
+                durations[ind] = duration
+                datasets.append(dataset)
+
+            probas = durations / np.sum(durations)
+            
+            logger.info(f"probas={probas}")
 
 
         if isinstance(indices[0], list):
