@@ -250,7 +250,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         self.max_tokens = max_tokens
         self.max_sentences = max_sentences
         self.required_batch_size_multiple = required_batch_size_multiple
-        logger.info(f"isinstance(indices[0], list) ? {isinstance(indices[0], list)} {indices[0]} indices:{indices} balance ? {self.balance}")
+        logger.info(f"isinstance(indices[0], list) ? {isinstance(indices[0], list)} {indices[0]} indices:{indices}")
         if isinstance(indices[0], list):
             batch_list = []
             for indice in indices:
