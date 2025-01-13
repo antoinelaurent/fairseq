@@ -299,6 +299,10 @@ class FairseqTask(object):
             logger.info(f"indices: {indices} (len : {len(indices)})")
 
             # create mini-batches with given size constraints
+
+            #batches contain indices of dataset examples for the curret epoch
+            #ex: array([3473, 2045, 2873, 1863, 2839, 3343]), array([2196, 2408, 3221, 2806, 4331, 3713]), ...
+
             batches = dataset.batch_by_size(
                 indices,
                 max_tokens=max_tokens,

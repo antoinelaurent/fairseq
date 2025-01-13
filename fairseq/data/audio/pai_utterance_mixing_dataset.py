@@ -194,7 +194,12 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         if self.balance:
             logger.info(f"{len(self.dataset_indices)} dataset loaded")
             for dataset in self.dataset_indices:
+                duration = 0
                 logger.info(f"{dataset}: {len(self.dataset_indices[dataset])}")
+                for ind in self.dataset_indices[dataset]:
+                    duration += sizes[ind]
+                logger.info(f"number of frames: {duration} (duration: {duration/self.sample_rate:.2f}s)")
+                logger.info(f"avg duration: {duration/len(self.dataset_indices[dataset])}")
 
         self.audio_root = root
         self.audio_names = names
@@ -262,6 +267,8 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         self.max_tokens = max_tokens
         self.max_sentences = max_sentences
         self.required_batch_size_multiple = required_batch_size_multiple
+        #ici il faut prepare les batches
+        #indice contient tous les fichiers
         logger.info(f"isinstance(indices[0], list) ? {isinstance(indices[0], list)} {indices[0]} indices:{indices}")
         if isinstance(indices[0], list):
             batch_list = []
