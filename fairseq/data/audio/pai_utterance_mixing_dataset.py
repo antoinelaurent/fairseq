@@ -282,15 +282,15 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
             durations = np.zeros(len(self.dataset_indices))
 
-            for (ind, dataset) in enumerate(self.dataset_indices):
+            for (dind, dataset) in enumerate(self.dataset_indices):
                 duration = 0
                 for ind in self.dataset_indices[dataset]:
                     duration += self.sizes[ind]
-                durations[ind] = duration
+                durations[dind] = duration
                 datasets.append(dataset)
 
             probas = durations / np.sum(durations)
-            
+
             logger.info(f"probas={probas}")
 
 
