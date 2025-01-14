@@ -309,15 +309,20 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
     def get_balance_indices(self):
         # convert duration of each dataset into probabilities
-        logger.info("get_balance_indices")
         indices = []
         selected_duration = 0
 
+        nb_stats = dict()
         while selected_duration < self.total_duration:
             dataset = self.datasets[self.cum_prob_duration.searchsorted(np.random.random())]
+            nb_stats[dataset] = nb_stats.get(dataset, 0) + 1
             ind_select = self.audio_dataset_cum_prob_duration[dataset].searchsorted(np.random.random())
             indices.append(self.dataset_indices[dataset][ind_select])
             selected_duration += self.max_sample_size
+
+        logger.info(f"get_balance_indices: {len(indices)} indices")
+        for dataset in nb_stats:
+            logger.info(f"get_balance_indices: {nb_stats[dataset]} example from {dataset} ({nb_stats[dataset]/len(indices)*100:.2f}%)")
         return indices
 
     def batch_by_size(self, indices, max_tokens=None, max_sentences=None, required_batch_size_multiple=1):
