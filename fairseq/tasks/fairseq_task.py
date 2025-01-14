@@ -316,7 +316,7 @@ class FairseqTask(object):
 
         reuse_dataloader = getattr(self.cfg, "reuse_dataloader", True)
         persistent_workers = getattr(self.cfg, "persistent_workers", True)
-        rebuild_batches = getattr(self.cfg, "rebuild_batches", False)
+        rebuild_batches = getattr(self.cfg, "rebuild_batches", True)
         logger.info(f"reuse_dataloader = {reuse_dataloader}")
         logger.info(f"rebuild_batches = {rebuild_batches}")
 
