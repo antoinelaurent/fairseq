@@ -142,8 +142,6 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         self.dataset_indices = dict()
         self.ind_dataset = []
 
-        self.cum_prob_duration = None
-
         n_long, n_short = 0, 0
         names, inds, sizes = [], [], []
         bnds = []
@@ -266,6 +264,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                 avg_crop = duration / len(self.dataset_indices[dataset]) / self.max_sample_size
                 logger.info(f"{dataset}: {len(self.dataset_indices[dataset])} - duration: {duration / self.sample_rate:.2f}s) - "
                             f"avg crop per file w/ sliding window: {avg_crop:.2f}")
+            self.prep_balance_indices()
 
 
     def set_epoch(self, epoch):
