@@ -256,15 +256,6 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         )
 
         if self.balance:
-            logger.info(f"{len(self.dataset_indices)} dataset loaded")
-            for dataset in self.dataset_indices:
-                duration = 0
-                for ind in self.dataset_indices[dataset]:
-                    duration += sizes[ind]
-                avg_crop = duration / len(self.dataset_indices[dataset]) / self.max_sample_size
-                logger.info(f"{dataset}: {len(self.dataset_indices[dataset])} - duration: {duration / self.sample_rate:.2f}s "
-                            f"({self.sectotime(duration/self.sample_rate)}) "
-                            f"avg crop per file w/ sliding window: {avg_crop:.2f}")
             self.prep_balance_indices()
 
 
@@ -283,6 +274,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
     def prep_balance_indices(self):
         self.datasets = []
+        logger.info(f"{len(self.dataset_indices)} dataset loaded")
         durations = np.zeros(len(self.dataset_indices))
         audio_dataset_durations = dict()
         self.audio_dataset_cum_prob_duration = dict()
@@ -303,7 +295,13 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
         self.total_duration = np.sum(durations)
 
-        #durations = np.log(durations)
+        for dataset in self.datasets:
+            logger.info(f"dataset={dataset}, duration={durations[dataset]/self.sample_rate:.2f}s"
+                        f"({self.sectotime(durations[dataset]/self.sample_rate)})")
+
+        durations = np.log(durations)
+
+        logger.log(f"datasets: {self.datasets}, Log durations: {durations}")
 
         # convert duration of each dataset into probabilities according to log durations
         self.cum_prob_duration = np.cumsum(
