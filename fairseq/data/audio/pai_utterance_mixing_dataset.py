@@ -311,11 +311,14 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             for dataset in datasets:
                 audio_dataset_cum_prob_duration[dataset] = audio_dataset_cum_prob_duration[dataset] / np.sum(audio_dataset_durations[dataset])
 
+            logger.info(f"{audio_dataset_cum_prob_duration}")
+
             indices = []
             selected_duration = 0
             while selected_duration < total_duration:
                 dataset = datasets[cum_prob_duration.searchsorted(np.random.random())]
                 ind_select = audio_dataset_cum_prob_duration[dataset].searchsorted(np.random.random())
+                logger.info(f"{dataset}: {ind_select}")
                 indice_dataset = self.dataset_indices[dataset][ind_select]
                 indices.append(indice_dataset)
                 selected_duration += self.max_sample_size
