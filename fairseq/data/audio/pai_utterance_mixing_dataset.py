@@ -142,6 +142,8 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         self.dataset_indices = dict()
         self.ind_dataset = []
 
+        self.cum_prob_duration = None
+
         n_long, n_short = 0, 0
         names, inds, sizes = [], [], []
         bnds = []
@@ -269,59 +271,58 @@ class PAIUtteranceMixingDataset(FairseqDataset):
     def set_epoch(self, epoch):
         self.epoch = epoch
 
+
+    def prep_balance_indices(self):
+        self.datasets = []
+        durations = np.zeros(len(self.dataset_indices))
+        audio_dataset_durations = dict()
+        self.audio_dataset_cum_prob_duration = dict()
+
+        for (dind, dataset) in enumerate(self.dataset_indices):
+            if not dataset in audio_dataset_durations:
+                audio_dataset_durations[dataset] = np.zeros(len(self.dataset_indices[dataset]))
+                self.audio_dataset_cum_prob_duration[dataset] = np.zeros(len(self.dataset_indices[dataset]))
+
+            for (ind, ind_datasets) in enumerate(self.dataset_indices[dataset]):
+                audio_dataset_durations[dataset][ind] = self.sizes[ind_datasets]
+                self.audio_dataset_cum_prob_duration[dataset][ind] = self.sizes[ind_datasets]
+                if ind > 0:
+                    self.audio_dataset_cum_prob_duration[dataset][ind] += self.audio_dataset_cum_prob_duration[dataset][ind - 1]
+
+            durations[dind] = np.sum(audio_dataset_durations[dataset])
+            self.datasets.append(dataset)
+
+        self.total_duration = np.sum(durations)
+
+        durations = np.log(durations)
+
+        # convert duration of each dataset into probabilities according to log durations
+        self.cum_prob_duration = np.cumsum(
+            durations / np.sum(durations)
+        )
+
+        # convert duration of each audiofile into probabilities according to durations
+        for dataset in self.datasets:
+            self.audio_dataset_cum_prob_duration[dataset] = self.audio_dataset_cum_prob_duration[dataset] / np.sum(
+                audio_dataset_durations[dataset])
+
+    def get_balance_indices(self):
+        # convert duration of each dataset into probabilities
+        logger.info("get_balance_indices")
+        indices = []
+        selected_duration = 0
+
+        while selected_duration < self.total_duration:
+            dataset = self.datasets[self.cum_prob_duration.searchsorted(np.random.random())]
+            ind_select = self.audio_dataset_cum_prob_duration[dataset].searchsorted(np.random.random())
+            indices.append(self.dataset_indices[dataset][ind_select])
+            selected_duration += self.max_sample_size
+        return indices
+
     def batch_by_size(self, indices, max_tokens=None, max_sentences=None, required_batch_size_multiple=1):
         self.max_tokens = max_tokens
         self.max_sentences = max_sentences
         self.required_batch_size_multiple = required_batch_size_multiple
-        #ici il faut prepare les batches
-        #indice contient tous les fichiers
-        logger.info(f"isinstance(indices[0], list) ? {isinstance(indices[0], list)} {indices[0]} indices:{indices}")
-        if self.balance:
-            # convert duration of each dataset into probabilities
-            datasets = []
-            durations = np.zeros(len(self.dataset_indices))
-            audio_dataset_durations = dict()
-            audio_dataset_cum_prob_duration = dict()
-
-            for (dind, dataset) in enumerate(self.dataset_indices):
-                logger.info(f"{dind} {dataset}")
-                if not dataset in audio_dataset_durations:
-                    audio_dataset_durations[dataset] = np.zeros(len(self.dataset_indices[dataset]))
-                    audio_dataset_cum_prob_duration[dataset] = np.zeros(len(self.dataset_indices[dataset]))
-
-                for (ind, ind_datasets) in enumerate(self.dataset_indices[dataset]):
-                    audio_dataset_durations[dataset][ind] = self.sizes[ind_datasets]
-                    audio_dataset_cum_prob_duration[dataset][ind] = self.sizes[ind_datasets]
-                    if ind > 0:
-                        audio_dataset_cum_prob_duration[dataset][ind] += audio_dataset_cum_prob_duration[dataset][ind-1]
-
-                durations[dind] = np.sum(audio_dataset_durations[dataset])
-                datasets.append(dataset)
-
-            total_duration = np.sum(durations)
-
-            durations = np.log(durations)
-
-            # convert duration of each dataset into probabilities according to log durations
-            cum_prob_duration = np.cumsum(
-                durations / np.sum(durations)
-            )
-
-            # convert duration of each audiofile into probabilities according to durations
-            for dataset in datasets:
-                audio_dataset_cum_prob_duration[dataset] = audio_dataset_cum_prob_duration[dataset] / np.sum(audio_dataset_durations[dataset])
-
-            logger.info(f"{audio_dataset_cum_prob_duration}")
-
-            indices = []
-            selected_duration = 0
-            while selected_duration < total_duration:
-                dataset = datasets[cum_prob_duration.searchsorted(np.random.random())]
-                ind_select = audio_dataset_cum_prob_duration[dataset].searchsorted(np.random.random())
-                logger.info(f"{dataset}: {ind_select}")
-                indice_dataset = self.dataset_indices[dataset][ind_select]
-                indices.append(indice_dataset)
-                selected_duration += self.max_sample_size
 
         if isinstance(indices[0], list):
             batch_list = []
@@ -669,8 +670,10 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         """Return an ordered list of indices. Batches will be constructed based
         on this order."""
 
+        if self.balance:
+            return self.get_balance_indices()
 
-        if self.shuffle:
+        elif self.shuffle:
             if len(self.chunk_names) > 0:
                 with data_utils.numpy_seed(self.epoch):
                     self.chunk_order = np.random.permutation(len(self.chunk_names))

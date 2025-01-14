@@ -296,7 +296,7 @@ class FairseqTask(object):
                     indices, dataset, max_positions, ignore_invalid_inputs
                 )
 
-            logger.info(f"indices: {indices} (len : {len(indices)})")
+            #logger.info(f"indices: {indices} (len : {len(indices)})")
 
             # create mini-batches with given size constraints
 
