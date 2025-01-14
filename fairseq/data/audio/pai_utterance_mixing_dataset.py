@@ -273,11 +273,12 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         self.epoch = epoch
 
     def sectotime(self, seconds):
-        heures = seconds // 3600
+        heures = int(seconds // 3600)
         seconds = seconds % 3600
-        minutes = seconds // 60
+        minutes = int(seconds // 60)
         seconds = seconds % 60
-        return f"{heures:02d}:{minutes:02d}:{seconds:02d}"
+        print(heures, minutes, seconds)
+        return f"{heures:02d}:{minutes:02d}:{seconds:05.2f}"
 
 
     def prep_balance_indices(self):
