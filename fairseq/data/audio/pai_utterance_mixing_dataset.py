@@ -318,7 +318,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                 ind_select = audio_dataset_cum_prob_duration[dataset].searchsorted(np.random.random())
                 indice_dataset = self.dataset_indices[dataset][ind_select]
                 indices.append(indice_dataset)
-                selected_duration += self.sizes[ind_select]
+                selected_duration += self.max_sample_size
 
         if isinstance(indices[0], list):
             batch_list = []
