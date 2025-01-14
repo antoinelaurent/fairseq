@@ -279,42 +279,46 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         if self.balance:
             # convert duration of each dataset into probabilities
             datasets = []
-            total_duration = 0
-
             durations = np.zeros(len(self.dataset_indices))
-
-            probas = dict()
-            tmp = dict()
+            audio_dataset_durations = dict()
+            audio_dataset_cum_prob_duration = dict()
 
             for (dind, dataset) in enumerate(self.dataset_indices):
-                duration = 0
+
+                if not dataset in audio_dataset_durations:
+                    audio_dataset_durations[dataset] = np.zeros(len(self.dataset_indices[dataset]))
+                    audio_dataset_cum_prob_duration[dataset] = np.zeros(len(self.dataset_indices[dataset]))
+
                 for ind in self.dataset_indices[dataset]:
-                    duration += self.sizes[ind]
-                durations[dind] = duration
-                tmp[dataset] = duration
+                    audio_dataset_durations[dataset][ind] = self.sizes[ind]
+                    audio_dataset_cum_prob_duration[dataset][ind] = self.sizes[ind]
+                    if ind > 0:
+                        audio_dataset_cum_prob_duration[dataset][ind] += audio_dataset_cum_prob_duration[dataset][ind-1]
+
+                durations[dind] = np.sum(audio_dataset_durations[dataset])
                 datasets.append(dataset)
 
-            for dataset in self.dataset_indices:
-                probas[dataset] = tmp[dataset] / np.sum(durations)
+            total_duration = np.sum(durations)
 
-            cum_prob_annotated_duration = np.cumsum(
+            durations = np.log(durations)
+
+            # convert duration of each dataset into probabilities according to log durations
+            cum_prob_duration = np.cumsum(
                 durations / np.sum(durations)
             )
 
-            logger.info(f"probas={probas} / cum_prob_annotated_duration={cum_prob_annotated_duration}")
-            logger.info(f"datasets={datasets} / cum_prob_annotated_duration={cum_prob_annotated_duration}")
+            # convert duration of each audiofile into probabilities according to durations
+            for dataset in datasets:
+                audio_dataset_cum_prob_duration[dataset] = audio_dataset_cum_prob_duration[dataset] / np.sum(audio_dataset_durations[dataset])
 
-            tirages = dict()
-            for i in range(10000):
-                dataset = datasets[cum_prob_annotated_duration.searchsorted(np.random.random())]
-                if not dataset in tirages:
-                    tirages[dataset] = 0
-                tirages[dataset] += 1
-
-            logger.info(f"tirages:{tirages}")
-            for d in tirages:
-                logger.info(f"tirage:{d}:{tirages[d]/10000}")
-                logger.info(f"proba:{d}:{probas[d]}")
+            indices = []
+            selected_duration = 0
+            while selected_duration < total_duration:
+                dataset = datasets[cum_prob_duration.searchsorted(np.random.random())]
+                ind_select = audio_dataset_cum_prob_duration[dataset].searchsorted(np.random.random())
+                indice_dataset = self.dataset_indices[dataset][ind_select]
+                indices.append(indice_dataset)
+                selected_duration += self.sizes[ind_select]
 
         if isinstance(indices[0], list):
             batch_list = []
