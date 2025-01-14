@@ -303,7 +303,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
         self.total_duration = np.sum(durations)
 
-        durations = np.log(durations)
+        #durations = np.log(durations)
 
         # convert duration of each dataset into probabilities according to log durations
         self.cum_prob_duration = np.cumsum(
