@@ -310,7 +310,7 @@ class FairseqTask(object):
                 required_batch_size_multiple=required_batch_size_multiple,
             )
 
-            logger.info(f"batches: {batches} (len : {len(batches)})")
+            #logger.info(f"batches: {batches} (len : {len(batches)})")
 
             return batches
 
