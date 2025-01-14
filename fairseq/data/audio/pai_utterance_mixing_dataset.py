@@ -295,7 +295,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
         self.total_duration = np.sum(durations)
 
-        for (ind, dataset) in self.datasets:
+        for (ind, dataset) in enumerate(self.datasets):
             logger.info(f"dataset={dataset}, duration={durations[ind]/self.sample_rate:.2f}s"
                         f"({self.sectotime(durations[ind]/self.sample_rate)})")
 
