@@ -344,9 +344,9 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             return batch_list
         else:
             batch_list = super(PAIUtteranceMixingDataset, self).batch_by_size(indices, max_tokens, max_sentences, required_batch_size_multiple)
-            for (i, batch) in enumerate(batch_list):
-                ds = [self.ind_dataset[ind] for ind in batch]
-                logger.info(f"bach:{i} - {ds}")
+            #for (i, batch) in enumerate(batch_list):
+            #    ds = [self.ind_dataset[ind] for ind in batch]
+            #    logger.info(f"bach:{i} - {ds}")
             return batch_list
 
     def shuffle_batches(self, batches, seed):
