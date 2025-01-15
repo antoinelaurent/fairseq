@@ -268,7 +268,6 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         seconds = seconds % 3600
         minutes = int(seconds // 60)
         seconds = seconds % 60
-        print(heures, minutes, seconds)
         return f"{heures:02d}:{minutes:02d}:{seconds:05.2f}"
 
 
