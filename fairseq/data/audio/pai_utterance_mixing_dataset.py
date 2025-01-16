@@ -445,8 +445,8 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             wav = wav.squeeze()
             #logger.info(f"start:{start_s}s end:{end_s}s duration={target_size/16000}s "
             #            f"({size_s}s total audio duration) {wav.shape}")
-            logger.info(f"stats_selected_files:{wav_id}\t{self.ind_dataset[wav_id]}\t{start/self.sample_rate:.2f}\t"
-                        f"{end/self.sample_rate:.2f}\t{size/self.sample_rate:.2f}")
+            #logger.info(f"stats_selected_files:{wav_id}\t{self.ind_dataset[wav_id]}\t{start/self.sample_rate:.2f}\t"
+            #            f"{end/self.sample_rate:.2f}\t{size/self.sample_rate:.2f}")
             assert wav.shape[0] == target_size
 
         #logger.info(f"SHAPE:{wav.shape}, START:{start}")
