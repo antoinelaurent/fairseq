@@ -137,6 +137,10 @@ class UtteranceMixingPretrainingConfig(FairseqDataclass):
         metadata={"help" : "When provided, will make sure that each dataset will be equally "
                            "represented in the training samples."}
     )
+    dataset_log_duration: bool = field(
+        default=False,
+        metadata={"help": "If true will sample the dataset according to their log duration (instead of duration)"}
+    )
 
 
 @register_task("utterance_mixing_pretraining", dataclass=UtteranceMixingPretrainingConfig)
@@ -228,7 +232,8 @@ class UtteranceMixingPretrainingTask(FairseqTask):
             mixing_noise_prob=self.cfg.mixing_noise_prob,
             mixing_noise_num=self.cfg.mixing_noise_num,
             noise_path=self.cfg.noise_path,
-            balance = self.cfg.balance
+            balance = self.cfg.balance,
+            dataset_log_duration=self.cfg.dataset_log_duration
         )
 
 

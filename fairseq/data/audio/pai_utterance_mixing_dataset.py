@@ -121,11 +121,13 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         mixing_noise_num: int = 1,
         noise_path: Optional[str] = None,
         balance: bool = False,
+        dataset_log_duration: bool = False,
     ):
         self.sample_rate = sample_rate
         self.shuffle = shuffle
         self.random_crop = random_crop
         self.balance = balance
+        self.dataset_log_duration = dataset_log_duration
 
         self.num_labels = len(label_paths)
         self.pad_list = pad_list
@@ -298,9 +300,11 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             logger.info(f"dataset={dataset}, duration={durations[ind]/self.sample_rate:.2f}s"
                         f"({self.sectotime(durations[ind]/self.sample_rate)})")
 
-        durations = np.log(durations)
-
-        logger.info(f"datasets: {self.datasets}, Log durations: {durations}")
+        if self.dataset_log_duration:
+            durations = np.log(durations)
+            logger.info(f"datasets: {self.datasets}, Log durations: {durations}")
+        else:
+            logger.info(f"datasets: {self.datasets}, durations: {durations}")
 
         # convert duration of each dataset into probabilities according to log durations
         self.cum_prob_duration = np.cumsum(
