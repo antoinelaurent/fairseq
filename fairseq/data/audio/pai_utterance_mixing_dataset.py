@@ -618,7 +618,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                 assert self.pad_audio
                 wav, sr = audio({"audio": wav_path})
                 wav = wav.squeeze()
-                logger.info(f"diff<0 ({diff}) wav.shape:{wav.shape} / {wav_path} / len(wav): {len(wav)}, size={self.sizes[audio_id]}")
+                #logger.info(f"diff<0 ({diff}) wav.shape:{wav.shape} / {wav_path} / len(wav): {len(wav)}, size={self.sizes[audio_id]}")
                 assert self.sizes[audio_id] == len(wav)
                 collated_audios[i] = torch.cat(
                     [wav, wav.new_full((-diff,), 0.0)]
