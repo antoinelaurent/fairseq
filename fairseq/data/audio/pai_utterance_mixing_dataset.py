@@ -281,6 +281,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         self.audio_dataset_cum_prob_duration = dict()
 
         for (dind, dataset) in enumerate(self.dataset_indices):
+            logger.info(f"i'm here ==> {dataset} / {dind}")
             if not dataset in audio_dataset_durations:
                 audio_dataset_durations[dataset] = np.zeros(len(self.dataset_indices[dataset]))
                 self.audio_dataset_cum_prob_duration[dataset] = np.zeros(len(self.dataset_indices[dataset]))
@@ -295,6 +296,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             self.datasets.append(dataset)
 
         self.total_duration = np.sum(durations)
+        logger.info(f"i'm here 1")
 
         for (ind, dataset) in enumerate(self.datasets):
             logger.info(f"dataset={dataset}, duration={durations[ind]/self.sample_rate:.2f}s"
