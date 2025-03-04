@@ -172,6 +172,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                             self.chunk_indices.append(len(names))
                     names.append(items[0])
                     inds.append(ind)
+                    ind_keep = len(sizes)
                     sizes.append(sz)
 
                     if self.balance:
@@ -181,7 +182,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                         dataset = items[2]
                         if not dataset in self.dataset_indices:
                             self.dataset_indices[dataset] = []
-                        self.dataset_indices[dataset].append(ind)
+                        self.dataset_indices[dataset].append(ind_keep)
                         self.ind_dataset.append(dataset)
 
                     if len(bnds) > 0:
@@ -260,7 +261,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
 
         if self.balance:
             if "HuggingFace" in self.dataset_indices:
-                logger.info(f"self.dataset_indices['HuggingFace']=>{self.dataset_indices['HuggingFace']}")
+                logger.info(f"self.dataset_indices HuggingFace => {self.dataset_indices['HuggingFace']}")
             self.prep_balance_indices()
 
 
