@@ -159,16 +159,6 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             for (ind, line) in enumerate(f):
                 items = line.strip().split("\t")
 
-                if self.balance:
-                    if len(items) != 3:
-                        logger.info("tsv file should contain the dataset name:\naudio\tnframes\tdataset")
-                    assert len(items) == 3
-                    dataset = items[2]
-                    if not dataset in self.dataset_indices:
-                        self.dataset_indices[dataset] = []
-                    self.dataset_indices[dataset].append(ind)
-                    self.ind_dataset.append(dataset)
-
                 sz = int(items[1])
                 if min_keep_sample_size is not None and sz < min_keep_sample_size:
                     n_short += 1
@@ -183,6 +173,17 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                     names.append(items[0])
                     inds.append(ind)
                     sizes.append(sz)
+
+                    if self.balance:
+                        if len(items) != 3:
+                            logger.info("tsv file should contain the dataset name:\naudio\tnframes\tdataset")
+                        assert len(items) == 3
+                        dataset = items[2]
+                        if not dataset in self.dataset_indices:
+                            self.dataset_indices[dataset] = []
+                        self.dataset_indices[dataset].append(ind)
+                        self.ind_dataset.append(dataset)
+
                     if len(bnds) > 0:
                         new_bnds.append(list(map(int, bnds[ind].strip().split())))
 
