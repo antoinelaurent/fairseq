@@ -292,12 +292,14 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                 f"audio_dataset_durations[dataset] => {audio_dataset_durations[dataset].shape}")
 
             for (ind, ind_datasets) in enumerate(self.dataset_indices[dataset]):
+                logger.info(f"i'm here 3 ==> {ind} / {ind_datasets}")
                 audio_dataset_durations[dataset][ind] = self.sizes[ind_datasets]
+                logger.info(f"audio_dataset_durations[dataset][ind] = {audio_dataset_durations[dataset][ind]}")
                 self.audio_dataset_cum_prob_duration[dataset][ind] = self.sizes[ind_datasets]
                 if ind > 0:
                     self.audio_dataset_cum_prob_duration[dataset][ind] += self.audio_dataset_cum_prob_duration[dataset][ind - 1]
 
-            logger.info(f"i'm here 3 ==> {dataset} / {dind}")
+
             durations[dind] = np.sum(audio_dataset_durations[dataset])
             self.datasets.append(dataset)
 
