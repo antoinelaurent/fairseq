@@ -286,6 +286,11 @@ class PAIUtteranceMixingDataset(FairseqDataset):
                 audio_dataset_durations[dataset] = np.zeros(len(self.dataset_indices[dataset]))
                 self.audio_dataset_cum_prob_duration[dataset] = np.zeros(len(self.dataset_indices[dataset]))
 
+            logger.info(f"i'm here 2 ==> {dataset} / {dind}")
+            logger.info(f"self.audio_dataset_cum_prob_duration[dataset] => {self.audio_dataset_cum_prob_duration[dataset].shape}")
+            logger.info(
+                f"audio_dataset_durations[dataset] => {audio_dataset_durations[dataset].shape}")
+
             for (ind, ind_datasets) in enumerate(self.dataset_indices[dataset]):
                 audio_dataset_durations[dataset][ind] = self.sizes[ind_datasets]
                 self.audio_dataset_cum_prob_duration[dataset][ind] = self.sizes[ind_datasets]
