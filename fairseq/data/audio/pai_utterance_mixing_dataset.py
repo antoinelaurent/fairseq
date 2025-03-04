@@ -259,7 +259,8 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         )
 
         if self.balance:
-            logger.info(f"self.dataset_indices['HuggingFace']=>{self.dataset_indices['HuggingFace']}")
+            if "HuggingFace" in self.dataset_indices:
+                logger.info(f"self.dataset_indices['HuggingFace']=>{self.dataset_indices['HuggingFace']}")
             self.prep_balance_indices()
 
 
