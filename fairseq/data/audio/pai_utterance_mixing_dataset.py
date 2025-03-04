@@ -260,10 +260,7 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         )
 
         if self.balance:
-            if "HuggingFace" in self.dataset_indices:
-                logger.info(f"self.dataset_indices HuggingFace => {self.dataset_indices['HuggingFace']}")
             self.prep_balance_indices()
-
 
 
     def set_epoch(self, epoch):
@@ -285,20 +282,12 @@ class PAIUtteranceMixingDataset(FairseqDataset):
         self.audio_dataset_cum_prob_duration = dict()
 
         for (dind, dataset) in enumerate(self.dataset_indices):
-            logger.info(f"i'm here ==> {dataset} / {dind}")
             if not dataset in audio_dataset_durations:
                 audio_dataset_durations[dataset] = np.zeros(len(self.dataset_indices[dataset]))
                 self.audio_dataset_cum_prob_duration[dataset] = np.zeros(len(self.dataset_indices[dataset]))
 
-            logger.info(f"i'm here 2 ==> {dataset} / {dind}")
-            logger.info(f"self.audio_dataset_cum_prob_duration[dataset] => {self.audio_dataset_cum_prob_duration[dataset].shape}")
-            logger.info(
-                f"audio_dataset_durations[dataset] => {audio_dataset_durations[dataset].shape}")
-
             for (ind, ind_datasets) in enumerate(self.dataset_indices[dataset]):
-                logger.info(f"i'm here 3 ==> {ind} / {ind_datasets}")
                 audio_dataset_durations[dataset][ind] = self.sizes[ind_datasets]
-                logger.info(f"audio_dataset_durations[dataset][ind] = {audio_dataset_durations[dataset][ind]}")
                 self.audio_dataset_cum_prob_duration[dataset][ind] = self.sizes[ind_datasets]
                 if ind > 0:
                     self.audio_dataset_cum_prob_duration[dataset][ind] += self.audio_dataset_cum_prob_duration[dataset][ind - 1]
@@ -308,7 +297,6 @@ class PAIUtteranceMixingDataset(FairseqDataset):
             self.datasets.append(dataset)
 
         self.total_duration = np.sum(durations)
-        logger.info(f"i'm here 1")
 
         for (ind, dataset) in enumerate(self.datasets):
             logger.info(f"dataset={dataset}, duration={durations[ind]/self.sample_rate:.2f}s"
